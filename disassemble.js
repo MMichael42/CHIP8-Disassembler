@@ -68,37 +68,63 @@ function decodeRom(romBuffer, programCounter) {
   if (byte2HexString.length === 1) byte2HexString = '0' + byte2HexString;
 
   let firstNibble = byte1 >> 4; // the high four bits from byte1
+  let lowNibbleFirstByte = byte1 & 0x0F;
+
   let addressSpace = (0x200 + programCounter).toString(16).toUpperCase(); //chip8 program addr space starts at 0x200
   let AddressAndHexInfo = (addressSpace + ': $' + byte1HexString + byte2HexString + '\n').toUpperCase();
+  let addressHi = (byte1 & 0x0F).toString(16); // high 4 bits of 12bit address
+  let registerX = (byte1 & 0x0F).toString(16); // registerX, lower 4 bits of the first byte
+  let registerY = (byte2 % 0xF0).toString(16) // registerY, high 4 bits from second byte
   let decodedString = '';
 
   // opcodes
   switch(firstNibble) {
     case 0x00:
       decodedString = '0x00 not handled yet'
+
+      switch(byte2) {
+        case 0xE0:
+          // clear screen
+          decodedString = 'CLS';
+          break;
+        case 0xEE:
+          // return from subroutine
+          decodedString = 'RET';
+          break;
+      }
       break;
     case 0x01:
-      decodedString = '0x01 not handled yet';
+      // 1nnn
+      // jump to address NNN
+      decodedString = `JP #$${addressHi}${byte2HexString}`.toUpperCase();
       break;
     case 0x02:
-      decodedString = '0x02 note handled yet';
+      // 2nnn
+      // Calls subroutine at NNN
+      decodedString = `Call #$${addressHi}${byte2HexString}`.toUpperCase();
       break;
     case 0x03:
-      decodedString = '0x03 not handled yet';
+      // 3xkk
+      // Skip next instruction if Vx == kk
+      decodedString = `SE V${registerX}, #$${byte2HexString}`;
       break;
     case 0x04:
-      decodedString = '0x04 not handled yet';
+      // 4xkk
+      // Skip next instruction if Vx !== kk
+      decodedString = `SNE V${registerX}, #$${byte2HexString}`;
       break;
     case 0x05:
-      decodedString = '0x05 not handled yet';
+      //5xy0
+      // Skip next instruction if Vx == Vy
+      decodedString = `SE V${registerX}, V${registerY}`;
       break;
     case 0x06:
-      // 6XNN: Sets VX to NN
-      let register = (byte1 & 0x0F).toString(16); // this gets the lower 4 bits of the first byte
-      decodedString = `MVI V${register}, #$${byte2HexString}`;
+      // 6XNN: Sets Vx to NN
+      decodedString = `MVI V${registerX}, #$${byte2HexString}`.toUpperCase();
       break;
     case 0x07:
-      decodedString = '0x07 not handled yet';
+      // 7xkk: adds kk to Vx, then stores that in Vx
+      decodedString =  `ADD V${registerX}, #$${byte2HexString}`;
       break;
     case 0x08:
       decodedString = '0x08 not handled yet';
@@ -108,7 +134,7 @@ function decodeRom(romBuffer, programCounter) {
       break;
     case 0x0A:
       // ANNN: Sets I to the address NNN;
-      let addressHi = (byte1 & 0x0F).toString(16); // high 4 bits of 12bit address
+      addressHi = (byte1 & 0x0F).toString(16); // high 4 bits of 12bit address
       decodedString = `MVI I, #$${addressHi}${byte2HexString}`;
       break;
     case 0x0B:
