@@ -4,7 +4,7 @@ let fishie = '../roms/Fishie.ch8';
 let pong = '../roms/pong.ch8';
 
 // load the file
-fetch(fishie)
+fetch(pong)
   .then( response => {
     return response.arrayBuffer();
   }).then( buffer => {
@@ -92,10 +92,12 @@ function decodeRom(romBuffer, programCounter) {
     case 0x00:
       switch(byte2) {
         case 0xE0:
+          //00E0
           // clear screen
           decodedString = 'CLS';
           break;
         case 0xEE:
+          // 00EE
           // return from subroutine
           decodedString = 'RET';
           break;
@@ -107,14 +109,14 @@ function decodeRom(romBuffer, programCounter) {
 
     case 0x01:
       // 1nnn
-      // jump to address NNN
-      decodedString = `JP #$${addressHi}${byte2HexString}`.toUpperCase();
+      // jump to address nnn
+      decodedString = `JP #$${addressHi}${byte2HexString}`;
       break;
 
     case 0x02:
       // 2nnn
-      // Calls subroutine at NNN
-      decodedString = `Call #$${addressHi}${byte2HexString}`.toUpperCase();
+      // Calls subroutine at nnn
+      decodedString = `CALL #$${addressHi}${byte2HexString}`;
       break;
 
     case 0x03:
@@ -130,15 +132,15 @@ function decodeRom(romBuffer, programCounter) {
       break;
 
     case 0x05:
-      //5xy0
+      // 5xy0
       // Skip next instruction if Vx == Vy
       decodedString = `SE V${registerX}, V${registerY}`;
       break;
 
     case 0x06:
-      // 6xnn 
-      // Sets Vx to NN
-      decodedString = `MVI V${registerX}, #$${byte2HexString}`.toUpperCase();
+      // 6xkk
+      // Sets Vx to kk
+      decodedString = `LD V${registerX}, #$${byte2HexString}`;
       break;
 
     case 0x07:
@@ -241,7 +243,7 @@ function decodeRom(romBuffer, programCounter) {
         case 0xA1:
           // ExA1
           // skip next insturction if key with the value of Vx is not pressed
-          decodedString `SKNP V${registerX}`;
+          decodedString = `SKNP V${registerX}`;
           break;
         default:
           decodedString = 'this 0x0E not handled yet';
