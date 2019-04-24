@@ -4,3 +4,22 @@ body {
   background-color: white;
   font-family: 'Courier New', Courier, monospace;
 }
+
+#container {
+  border: 0px solid black;
+  width: 100%;
+}
+
+#header {
+  border: 0px solid black;
+  width: 100%;
+  text-align: center;
+}
+
+#data {
+  border: 0px solid red;
+  padding: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  font-size: 12px;
+}

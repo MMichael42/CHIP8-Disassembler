@@ -1,5 +1,7 @@
 console.log('CHIP-8 Disassembler');
 
+let dataDiv = document.querySelector('#data');
+
 let fishie = '../roms/Fishie.ch8';
 let pong = '../roms/pong.ch8';
 
@@ -23,7 +25,7 @@ fetch(pong)
       outputText += decode + '\n\n';
       pc += 2;
     }
-    document.querySelector('body').innerText = outputText;
+    dataDiv.innerText = outputText;
 
   });
 
@@ -102,7 +104,7 @@ function decodeRom(romBuffer, programCounter) {
           decodedString = 'RET';
           break;
         default:
-          decodedString = 'this 0x00 case not handled, possible graphic/ascii?';
+          decodedString = 'this 0x00 case not handled, NO OP?';
           break;
       }
       break;
