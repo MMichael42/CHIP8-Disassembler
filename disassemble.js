@@ -199,6 +199,7 @@ function decodeRom(romBuffer, programCounter) {
           decodedString = 'this 0x08 case not handled yet';
           break;
       }
+      break;
       
     case 0x09:
       // 9xy0
@@ -299,6 +300,7 @@ function decodeRom(romBuffer, programCounter) {
           decodedString = 'this 0x0F not handled yet';
           break;
       }
+      break;
       
     default:
       decodedString = 'unrecongized opcode - something went wrong';
