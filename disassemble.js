@@ -3,29 +3,23 @@ console.log('CHIP-8 Disassembler');
 let fishie = '../roms/Fishie.ch8';
 let pong = '../roms/pong.ch8';
 
-let bytetest = 0xef;
-let masked = (bytetest & 0xf0) >>> 4;
-console.log(bytetest.toString(2));
-console.log(masked.toString(2));
-
-
 // load the file
 fetch(fishie)
   .then( response => {
     return response.arrayBuffer();
   }).then( buffer => {
     let hexArr = createHexArrayFromBuffer(buffer);
-    console.log(hexArr);
+    // console.log(hexArr);
 
     let numArr = new Uint8Array(buffer);
-    console.log(numArr);
+    // console.log(numArr);
 
     let pc = 0;
     let outputText = '';
 
     while(pc < numArr.length) {
       let decode = decodeRom(numArr, pc);
-      console.log(decode);
+      // console.log(decode);
       outputText += decode + '\n\n';
       pc += 2;
     }
@@ -73,22 +67,29 @@ function decodeRom(romBuffer, programCounter) {
   let byte2HexString = byte2.toString(16);
   if (byte2HexString.length === 1) byte2HexString = '0' + byte2HexString;
 
-  let firstNibble = byte1 >> 4; // the high four bits from byte1
-  let lowNibbleFirstByte = byte1 & 0x0F;
+  let highNibbleByte1 = byte1 >> 4; // the high four bits from byte1
+  let lowNibbleByte1 = byte1 & 0x0F; // low four bits from byte1
+  let highNibbleByte2 = byte2 >> 4; // the hight four bits from byte2
+  let lowNibbleByte2 = byte2 & 0x0F; // the low four bits from byte2
 
   let addressSpace = (0x200 + programCounter).toString(16).toUpperCase(); //chip8 program addr space starts at 0x200
   let AddressAndHexInfo = (addressSpace + ': $' + byte1HexString + byte2HexString + '\n').toUpperCase();
-  let addressHi = (byte1 & 0x0F).toString(16); // high 4 bits of 12bit address
-  let registerX = (byte1 & 0x0F).toString(16); // registerX, lower 4 bits of the first byte
-  let registerY = ((byte2 % 0xF0) >>> 4).toString(16) // registerY, high 4 bits from second byte
-
+  
+  // strings
+  let addressHi = highNibbleByte2.toString(16); // high 4 bits of 12bit address
+  let registerX = lowNibbleByte1.toString(16); // registerX, lower 4 bits of the first byte
+  let registerY = highNibbleByte2.toString(16) // registerY, high 4 bits from second byte
+  let lowNibble = lowNibbleByte2.toString(16); // lowest 4 bits of opcode
   let decodedString = '';
 
-  // opcodes
-  switch(firstNibble) {
+  // opcodes key:
+  // nnn or addr: 12 bit value, lowest bits of the opcode
+  // n or nibble: 4 bit value, lowest bits of the opcode
+  // x: 4 bit value, lowest bits of the high byte (byte1) of the opcode
+  // y: 4 bit value, highest bits of the low byte (byte2) of the opcode
+  // kk o byte: 8 bit value, lowest bits of the opcode (aka byte2);
+  switch(highNibbleByte1) {
     case 0x00:
-      decodedString = '0x00 not handled yet'
-
       switch(byte2) {
         case 0xE0:
           // clear screen
@@ -98,45 +99,56 @@ function decodeRom(romBuffer, programCounter) {
           // return from subroutine
           decodedString = 'RET';
           break;
+        default:
+          decodedString = 'this 0x00 case not handled, possible graphic/ascii?';
+          break;
       }
       break;
+
     case 0x01:
       // 1nnn
       // jump to address NNN
       decodedString = `JP #$${addressHi}${byte2HexString}`.toUpperCase();
       break;
+
     case 0x02:
       // 2nnn
       // Calls subroutine at NNN
       decodedString = `Call #$${addressHi}${byte2HexString}`.toUpperCase();
       break;
+
     case 0x03:
       // 3xkk
       // Skip next instruction if Vx == kk
       decodedString = `SE V${registerX}, #$${byte2HexString}`;
       break;
+
     case 0x04:
       // 4xkk
       // Skip next instruction if Vx !== kk
       decodedString = `SNE V${registerX}, #$${byte2HexString}`;
       break;
+
     case 0x05:
       //5xy0
       // Skip next instruction if Vx == Vy
       decodedString = `SE V${registerX}, V${registerY}`;
       break;
+
     case 0x06:
       // 6xnn 
       // Sets Vx to NN
       decodedString = `MVI V${registerX}, #$${byte2HexString}`.toUpperCase();
       break;
+
     case 0x07:
       // 7xkk
       // adds kk to Vx, then stores that in Vx
       decodedString =  `ADD V${registerX}, #$${byte2HexString}`;
       break;
+
     case 0x08:      
-      decodedString = '0x08 not handled yet';
+      // check the lower four bits to find out what insturction to run
       switch(byte2 & 0x0F) {
         case 0x00:
           // 8xy0
@@ -183,31 +195,111 @@ function decodeRom(romBuffer, programCounter) {
           // set Vx = Vx SHL 1
           decodedString = `SHL V${registerX} {, V${registerY}}`;
           break;
+        default:
+          decodedString = 'this 0x08 case not handled yet';
+          break;
+      }
+      
+    case 0x09:
+      // 9xy0
+      // skip next instruction if Vx != Vy
+      decodedString = `SNE V${registerX}, V${registerY}`;
+      break;
+
+    case 0x0A:
+      // Annn
+      // sets I = nnn
+      decodedString = `LD I, #$${addressHi}${byte2HexString}`;
+      break;
+
+    case 0x0B:
+      // Bnnn
+      // jump to location nnn + V0
+      decodedString = `JP V0, #$${addressHi}${byte2HexString}`;
+      break;
+
+    case 0x0C:
+      // Cxkk
+      // set Vx = random byte AND kk
+      decodedString = `RND V${registerX}, #$${byte2HexString}`;
+      break;
+
+    case 0x0D:
+      // Dxyn
+      // display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
+      decodedString = `DRW V${registerX}, V${registerY}, ${lowNibble}`;
+      break;
+
+    case 0x0E:
+      switch(byte2) {
+        case 0x9E:
+          // Ex9E
+          // skip next instruction if key with the value of Vx is pressed
+          decodedString = `SKP V${registerX}`;
+          break;
+        case 0xA1:
+          // ExA1
+          // skip next insturction if key with the value of Vx is not pressed
+          decodedString `SKNP V${registerX}`;
+          break;
+        default:
+          decodedString = 'this 0x0E not handled yet';
+          break;
       }
       break;
-    case 0x09:
-      decodedString = '0x09 not handled yet';
-      break;
-    case 0x0A:
-      // ANNN: Sets I to the address NNN;
-      addressHi = (byte1 & 0x0F).toString(16); // high 4 bits of 12bit address
-      decodedString = `MVI I, #$${addressHi}${byte2HexString}`;
-      break;
-    case 0x0B:
-      decodedString = '0x0B not handled yet';
-      break;
-    case 0x0C:
-      decodedString = '0x0C not handled yet';
-      break;
-    case 0x0D:
-      decodedString = '0x0D not handled yet';
-      break;
-    case 0x0E:
-      decodedString = '0x0E not handled yet';
-      break;
+
     case 0x0F:
-      decodedString = '0x0F not handled yet';
-      break;
+      switch(byte2) {
+        case 0x07:
+          // Fx07
+          // set Vx = delay timer value
+          decodedString = `LD V${registerX}, DT`;
+          break;
+        case 0x0A:
+          // Fx0A
+          // wait for a key press, store the value of the key press into Vx
+          decodedString = `LD V${registerX}, K`;
+          break;
+        case 0x15:
+          // Fx15
+          // set delay timer = Vx
+          decodedString = `LD DT, V${registerX}`;
+          break;
+        case 0x18:
+          // Fx18
+          // set sound timer = Vx
+          decodedString = `LD ST, V${registerX}`;
+          break;
+        case 0x1E:
+          // Fx1E
+          // Set I = I + Vx
+          decodedString = `ADD I, V${registerX}`;
+          break;
+        case 0x29:
+          // Fx29
+          // set I = location of sprite for digit Vx
+          decodedString = `LD F, V${registerX}`;
+          break;
+        case 0x33:
+          // Fx33
+          // store BCD represenation of Vx in memory locations I, I+1, and I+2
+          decodedString = `LD B, V${registerX}`;
+          break;
+        case 0x55:
+          // Fx55
+          // store registers V0 through Vx in memory starting at location I
+          decodedString = `LD [I], V${registerX}`;
+          break;
+        case 0x65:
+          // Fx65
+          // read registers V0 through Vx from memory location I
+          decodedString = `LD V${registerX}, [I]`;
+          break;
+        default:
+          decodedString = 'this 0x0F not handled yet';
+          break;
+      }
+      
     default:
       decodedString = 'unrecongized opcode - something went wrong';
       break;
