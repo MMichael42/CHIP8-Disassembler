@@ -20,6 +20,7 @@ body {
   border: 0px solid red;
   padding: 10px;
   box-sizing: border-box;
-  width: 100%;
-  font-size: 12px;
+  font-size: 18px;
+  width: 320px;
+  margin: auto;
 }

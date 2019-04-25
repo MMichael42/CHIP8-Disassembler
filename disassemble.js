@@ -22,10 +22,10 @@ fetch(pong)
     while(pc < numArr.length) {
       let decode = decodeRom(numArr, pc);
       // console.log(decode);
-      outputText += decode + '\n\n';
+      outputText += decode + '<br><br>';
       pc += 2;
     }
-    dataDiv.innerText = outputText;
+    dataDiv.innerHTML = outputText;
 
   });
 
@@ -74,8 +74,8 @@ function decodeRom(romBuffer, programCounter) {
   let highNibbleByte2 = byte2 >> 4; // the hight four bits from byte2
   let lowNibbleByte2 = byte2 & 0x0F; // the low four bits from byte2
 
-  let addressSpace = (0x200 + programCounter).toString(16).toUpperCase(); //chip8 program addr space starts at 0x200
-  let AddressAndHexInfo = (addressSpace + ': $' + byte1HexString + byte2HexString + '\n').toUpperCase();
+  let addressSpace = (0x200 + programCounter).toString(16); //chip8 program addr space starts at 0x200
+  let addressAndHexInfo = `${addressSpace}: $${byte1HexString}${byte2HexString} <br>`;
   
   // strings
   let addressHi = highNibbleByte2.toString(16); // high 4 bits of 12bit address
@@ -310,5 +310,5 @@ function decodeRom(romBuffer, programCounter) {
       decodedString = 'unrecongized opcode - something went wrong';
       break;
   }
-  return (AddressAndHexInfo + decodedString).toUpperCase();
+  return (addressAndHexInfo + decodedString).toUpperCase();
 }
