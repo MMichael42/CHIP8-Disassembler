@@ -66,11 +66,13 @@ function decodeRom(romBuffer, programCounter) {
 
   let byte1HexString = byte1.toString(16);
   if (byte1HexString.length === 1) byte1HexString = '0' + byte1HexString;
+
   let byte2HexString = byte2.toString(16);
   if (byte2HexString.length === 1) byte2HexString = '0' + byte2HexString;
 
   let highNibbleByte1 = byte1 >> 4; // the high four bits from byte1
   let lowNibbleByte1 = byte1 & 0x0F; // low four bits from byte1
+  
   let highNibbleByte2 = byte2 >> 4; // the hight four bits from byte2
   let lowNibbleByte2 = byte2 & 0x0F; // the low four bits from byte2
 
