@@ -1,5 +1,9 @@
-const DisplayRenderer = function() {
+const Renderer = function() {
 
-} 
+}
 
-export default DisplayRenderer;
+Renderer.prototype = {
+
+}
+
+export default Renderer;

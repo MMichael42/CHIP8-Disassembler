@@ -1,8 +1,9 @@
 console.log('index');
 import CPU from '/js/cpu.js';
-import DisplayRenderer from '/js/renderer.js';
+import Renderer from '/js/renderer.js';
 
-const pong = '/roms/pong.ch8';
+const pong = '/roms/pong1.ch8';
+const stars = '/roms/stars.ch8';
 
 async function loadFile(fileDirStr) {
   let response = await fetch(fileDirStr);
@@ -10,13 +11,14 @@ async function loadFile(fileDirStr) {
   return data;
 }
 
+const canvas = document.getElementById('screen');
 
-loadFile(pong).then ( data => {
+
+loadFile(stars).then( data => {
   console.log('pong loaded');
   let cpu = new CPU();
-  cpu.reset();
+  cpu.init();
   cpu.loadROM(new Uint8Array(data));
-  cpu.printMemory();
   cpu.run();
 });
 

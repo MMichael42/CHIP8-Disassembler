@@ -3,3 +3,8 @@ body {
   padding: 0;
   background-color: black;
 }
+
+#screen {
+  width: 50%;
+  border: 0px solid white;
+}
