@@ -14,6 +14,7 @@ let Chip8 = function() {
   this.displayWidth = 64;
   this.displayHeight = 32;
   this.display = new Array(this.displayWidth * this.displayHeight);
+  this.renderer = null;
 
   // timers
   this.soundTimer = 0;
@@ -28,6 +29,10 @@ let Chip8 = function() {
 }
 
 Chip8.prototype = {
+  setRenderer: function(renderer) {
+    this.renderer = renderer;
+  },
+
   init: function() {
     console.log('init CPU');
     this.cycleCount = 0;
@@ -101,14 +106,9 @@ Chip8.prototype = {
       }
 
       if (self.drawFlag) {
-        console.log('draw call');
+        self.renderer.render(self.display);
         self.drawFlag = false;
       }
-
-      // handle timers here if cycle count is what exactly?
-      // if (!(self.cycleCount % 2)) {
-      //   self.handleTimers();
-      // }
 
       requestAnimationFrame(me);
     });
@@ -124,7 +124,6 @@ Chip8.prototype = {
     // fetch opcode
     const opcode = this.memory[this.programCounter] << 8 | this.memory[this.programCounter + 1];
     console.log('opcode: ' + opcode.toString(16));
-
 
     // execute opcode
     switch (opcode & 0xF000) {
@@ -258,6 +257,7 @@ Chip8.prototype = {
         let pixel = null;
 
         this.v[0xF] = 0;
+
         for (let yLine = 0; yLine < height; yLine++) {
           pixel = this.memory[this.I + yLine];
           for (let xLine = 0; xLine < 8; xLine++) {
@@ -272,6 +272,22 @@ Chip8.prototype = {
         }
         this.drawFlag = true;
         this.programCounter += 2;
+        break;
+      case 0xE000:
+        // EX__
+        switch (opcode & 0x00FF) {
+          case 0x009E:
+            //EX9E - skips next opcode if the key stored in Vx is active
+            if (this.keys[this.v[(opcode & 0x0F00) >> 8]] !== 0) {
+              this.programCounter += 4;
+            } else {
+              this.programCounter += 2;
+            }
+            break;
+          default:
+            console.log('unhanled EX__ opcode: ' + opcode);
+            this.running = false;
+        }
         break;
       case 0xF000:
         // FX__
@@ -357,6 +373,17 @@ Chip8.prototype = {
         console.log('opcode not handled: ' + opcode.toString(16));
         console.log('CPU cycle: ' + this.cycleCount);
         this.running = false;
+    }
+
+    // handle timers here if cycle count is what exactly?
+    if (self.delayTimer > 0) {
+      self.delayTimer--;
+    }
+    if (self.soundTimer > 0) {
+      if (self.soundTimer === 1) {
+        console.log('beep!');
+      }
+      self.soundTimer--;
     }
   }
 }
