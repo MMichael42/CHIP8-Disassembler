@@ -213,12 +213,17 @@ Chip8.prototype = {
             this.v[(opcode & 0x0F00) >> 8] &= this.v[(opcode & 0x00F0) >> 4];
             this.programCounter += 2;
             break;
+          case 0x0003:
+            // 8XY3 - sets Vx to (Vx & Vy)
+            this.v[(opcode & 0x0F00) >> 8] &= this.v[(opcode & 0x00F0) >> 4];
+            this.programCounter += 2;
+            break;
           case 0x0004:
             // 8XY4 - adds Vy to Vx. 
             // VF is set to 1 when there's a carry
             // VF set to 0 when there isn't a carry
             this.v[(opcode & 0x0F00) >> 8] += this.v[(opcode & 0x00F0) >> 4];
-            if (this.v[(opcode & 0x00F0) >> 4] > (0xFF - this.v[(opcode & 0x0F00 >> 8)])) {
+            if (this.v[(opcode & 0x00F0) >> 4] > (0xFF - this.v[(opcode & 0x0F00) >> 8])) {
               this.v[0xF] = 1;
             } else {
               this.v[0xF] = 0;
@@ -237,6 +242,20 @@ Chip8.prototype = {
               this.v[0xF] = 1;
             }
             this.v[(opcode & 0x0F00) >> 8] -= this.v[(opcode & 0x00F0) >> 4];
+            this.programCounter += 2;
+            break;
+          case 0x0006:
+            // 8XY6 - shifts Vx right by one. 
+            // VF set to the value of least significant bit of Vx before the shift
+            this.v[0xF] = this.v[(opcode & 0x0F00) >> 8] & 0x1;
+            this.v[(opcode & 0x0F00) >> 8] >>= 1;
+            this.programCounter += 2;
+            break;
+          case 0x000E:
+            // 8XYE - shifts tv left by one
+            // VF set to least signifcnat bit of Vx before shit
+            this.v[0xF] = this.v[(opcode & 0x0F00) >> 8] >> 7;
+            this.v[(opcode & 0x0F00) >> 8] <<= 1;
             this.programCounter += 2;
             break;
           default:
@@ -310,7 +329,7 @@ Chip8.prototype = {
             break;
           case 0x00A1:
             // EXA1 - skips next opcode if the key stores in Vx isn't active
-            if (this.keys[this.v[(opcode & 0x0F00) >> 8]] === 8) {
+            if (this.keys[this.v[(opcode & 0x0F00) >> 8]] === 0) {
               this.programCounter += 4;
             } else {
               this.programCounter += 2;
@@ -333,7 +352,7 @@ Chip8.prototype = {
             // FX0A - a key press is awaited, then stored in Vx
             let keyPressed = false;
             for (let i = 0; i < 16; i++) {
-              if (this.keys[i] != 0) {
+              if (this.keys[i] !== 0) {
                 this.v[(opcode & 0x0F00) >> 8] = i;
                 keyPressed = true;
               }
@@ -379,7 +398,7 @@ Chip8.prototype = {
             break;
           case 0x0055:
             // FX55 - stores V0 to Vx in memory starting at address I
-            for (let i = 0; i <= this.v[(opcode & 0x0F00) >> 8]; i++) {
+            for (let i = 0; i <= ((opcode & 0x0F00) >> 8); i++) {
               this.memory[this.I + i] = this.v[i];
             }
             // in original interpreter, when this operation is done
@@ -388,7 +407,7 @@ Chip8.prototype = {
             this.programCounter += 2;
             break;
           case 0x0065:
-            for (let i = 0; i <= this.v[(opcode & 0x0F00) >> 8]; i++) {
+            for (let i = 0; i <= ((opcode & 0x0F00) >> 8); i++) {
               this.v[i] = this.memory[this.I + i];
             }
             // in original interpreter, when this operation is done

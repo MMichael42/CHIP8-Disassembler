@@ -8,6 +8,7 @@ const pong2 = '/roms/pong2.ch8';
 const stars = '/roms/stars.ch8';
 const tetris = '/roms/tetris.ch8';
 const maze = '/roms/maze.ch8';
+const blinky = '/roms/blinky.ch8';
 
 async function loadFile(fileDirStr) {
   let response = await fetch(fileDirStr);
@@ -17,7 +18,7 @@ async function loadFile(fileDirStr) {
 
 let canvas = document.getElementById('screen');
 
-loadFile(pong).then( data => {
+loadFile(pong2).then( data => {
   console.log('pong loaded');
   let cpu = new CPU();
   const renderer = new Renderer(canvas, 13);
