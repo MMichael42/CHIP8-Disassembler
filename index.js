@@ -17,11 +17,10 @@ async function loadFile(fileDirStr) {
 
 let canvas = document.getElementById('screen');
 
-
-loadFile(pong2).then( data => {
+loadFile(pong).then( data => {
   console.log('pong loaded');
   let cpu = new CPU();
-  const renderer = new Renderer(canvas, 8);
+  const renderer = new Renderer(canvas, 13);
   cpu.setRenderer(renderer);
   cpu.init();
   cpu.loadROM(new Uint8Array(data));

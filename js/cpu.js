@@ -70,6 +70,7 @@ Chip8.prototype = {
     for (let i = 0; i < hexChars.length; i++) {
       this.memory[i] = hexChars[i];
     }
+    console.log(this.memory);
   
     // clear the display
     for (let i = 0; i < this.display.length; i++) {
@@ -95,27 +96,30 @@ Chip8.prototype = {
     console.log('run');
     const self = this; // use closure to keep reference to 'this' for the requestAnimationFrame function
     requestAnimationFrame(function me() {
-      if (self.running) {
-        for (let i = 0; i < 10; i++) {
-          // check again so we don't try to step the CPU 
-          // needlessly 10 times when it's not running
-          if (self.running) {
-            self.emulateCycle();
-          }
-        }
-      }
-
       if (self.drawFlag) {
         self.renderer.render(self.display);
         self.drawFlag = false;
       }
 
+      for (let i = 0; i < 10; i++) {
+        if (self.running) {
+          self.emulateCycle();
+        }
+      }
+  
       requestAnimationFrame(me);
     });
-  },
 
-  handleTimers: function() {
-    console.log('timers');
+    // let selfObj = this;
+    // selfObj.set = setInterval(function() {
+    //   if (selfObj.drawFlag) {
+    //     selfObj.renderer.render(selfObj.display);
+    //     selfObj.drawFlag = false;
+    //   }
+    //   if (selfObj.running) {
+    //     selfObj.emulateCycle();
+    //   }
+    // }, 10);
   },
 
   emulateCycle: function() {
@@ -128,13 +132,16 @@ Chip8.prototype = {
     // execute opcode
     switch (opcode & 0xF000) {
       case 0x0000:
+        // 00E_
         switch (opcode & 0x000F) {
           case 0x000:
             // 00E0 - clear screen
+            console.log('clear screen');
             for (let i = 0; i < this.display.length; i++) {
-              this.display[i] = 0x0;
+              this.display[i] = 0;
             }
             this.drawFlag = true;
+            // this.renderer.render(this.display);
             this.programCounter += 2;
             break;
           case 0x000E:
@@ -169,15 +176,12 @@ Chip8.prototype = {
         }
         break;
       case 0x4000:
-        // 8XY4 - adds Vy to Vx. VF is set to 1 when there's a carry
-        // VF set to 0 when there isn't a carry
-        this.v[(opcode & 0x0F00) >> 8] += this.v[(opcode & 0x00F0) >> 4];
-        if (this.v[(opcode & 0x00F0) >> 4] > (0xFF - this.v[(opcode & 0x0F00) >> 8])) {
-          this.v[0xF] = 1;
+        // 4XNN - skips next instrution if Vx does not equal NN
+        if (this.v[(opcode & 0x0F00) >> 8] !== (opcode & 0x0FF)) {
+          this.programCounter += 4;
         } else {
-          this.v[0xF] = 0;
+          this.programCounter += 2;
         }
-        this.programCounter += 2;
         break;
       case 0x5000:
         // 5XY0 - skips the next opcode if Vx === Vy
@@ -276,9 +280,12 @@ Chip8.prototype = {
 
         for (let yLine = 0; yLine < height; yLine++) {
           pixel = this.memory[this.I + yLine];
+
           for (let xLine = 0; xLine < 8; xLine++) {
-            if ((pixel & (0x80 >> xLine)) != 0) {
-              if(this.display[(x + xLine + ((y + yLine) * 64))] == 1) {
+
+            if ((pixel & (0x80 >> xLine)) !== 0) {
+
+              if (this.display[(x + xLine + ((y + yLine) * 64))] === 1) {
                 // a pixel has been set/unset
                 this.v[0xF] = 1;
               }
@@ -287,6 +294,7 @@ Chip8.prototype = {
           }
         }
         this.drawFlag = true;
+        // this.renderer.render(this.display);
         this.programCounter += 2;
         break;
       case 0xE000:
@@ -399,7 +407,7 @@ Chip8.prototype = {
         this.running = false;
     }
 
-    // handle timers here if cycle count is what exactly?
+    // check timers
     if (this.delayTimer > 0) {
       this.delayTimer--;
     }

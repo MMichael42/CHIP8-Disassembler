@@ -1,10 +1,11 @@
 body {
   margin: 0;
   padding: 10px;
-  background-color: gray;
+  background-color: white;
 
 }
 
 #screen {
   border: 0px solid white;
+  box-shadow: rgb(194, 194, 194) 10px 10px 10px;
 }
