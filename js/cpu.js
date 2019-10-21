@@ -168,6 +168,17 @@ Chip8.prototype = {
           this.programCounter += 2;
         }
         break;
+      case 0x4000:
+        // 8XY4 - adds Vy to Vx. VF is set to 1 when there's a carry
+        // VF set to 0 when there isn't a carry
+        this.v[(opcode & 0x0F00) >> 8] += this.v[(opcode & 0x00F0) >> 4];
+        if (this.v[(opcode & 0x00F0) >> 4] > (0xFF - this.v[(opcode & 0x0F00) >> 8])) {
+          this.v[0xF] = 1;
+        } else {
+          this.v[0xF] = 0;
+        }
+        this.programCounter += 2;
+        break;
       case 0x5000:
         // 5XY0 - skips the next opcode if Vx === Vy
         if (this.v[(opcode & 0x0F00) >> 8] === this.v[(opcode & 0x00F0) >> 4]) {
@@ -191,6 +202,11 @@ Chip8.prototype = {
           case 0x0000:
             // 8XY0 - sets Vx to the value of Vy
             this.v[(opcode & 0x0F00) >> 8] = this.v[(opcode & 0x00F0) >> 4];
+            this.programCounter += 2;
+            break;
+          case 0x0002:
+            // 8XY2 - sets Vx to (Vx & Vy)
+            this.v[(opcode & 0x0F00) >> 8] &= this.v[(opcode & 0x00F0) >> 4];
             this.programCounter += 2;
             break;
           case 0x0004:
@@ -284,8 +300,16 @@ Chip8.prototype = {
               this.programCounter += 2;
             }
             break;
+          case 0x00A1:
+            // EXA1 - skips next opcode if the key stores in Vx isn't active
+            if (this.keys[this.v[(opcode & 0x0F00) >> 8]] === 8) {
+              this.programCounter += 4;
+            } else {
+              this.programCounter += 2;
+            }
+            break;
           default:
-            console.log('unhanled EX__ opcode: ' + opcode);
+            console.log('unhanled EX__ opcode: ' + opcode.toString(16));
             this.running = false;
         }
         break;
@@ -376,14 +400,14 @@ Chip8.prototype = {
     }
 
     // handle timers here if cycle count is what exactly?
-    if (self.delayTimer > 0) {
-      self.delayTimer--;
+    if (this.delayTimer > 0) {
+      this.delayTimer--;
     }
-    if (self.soundTimer > 0) {
-      if (self.soundTimer === 1) {
+    if (this.soundTimer > 0) {
+      if (this.soundTimer === 1) {
         console.log('beep!');
       }
-      self.soundTimer--;
+      this.soundTimer--;
     }
   }
 }

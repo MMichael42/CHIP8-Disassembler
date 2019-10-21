@@ -2,7 +2,9 @@ console.log('index');
 import CPU from '/js/cpu.js';
 import Renderer from '/js/renderer.js';
 
+
 const pong = '/roms/pong1.ch8';
+const pong2 = '/roms/pong2.ch8';
 const stars = '/roms/stars.ch8';
 const tetris = '/roms/tetris.ch8';
 const maze = '/roms/maze.ch8';
@@ -16,7 +18,7 @@ async function loadFile(fileDirStr) {
 let canvas = document.getElementById('screen');
 
 
-loadFile(pong).then( data => {
+loadFile(pong2).then( data => {
   console.log('pong loaded');
   let cpu = new CPU();
   const renderer = new Renderer(canvas, 8);
