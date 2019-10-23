@@ -109,17 +109,6 @@ Chip8.prototype = {
   
       requestAnimationFrame(me);
     });
-
-    // let selfObj = this;
-    // selfObj.set = setInterval(function() {
-    //   if (selfObj.drawFlag) {
-    //     selfObj.renderer.render(selfObj.display);
-    //     selfObj.drawFlag = false;
-    //   }
-    //   if (selfObj.running) {
-    //     selfObj.emulateCycle();
-    //   }
-    // }, 10);
   },
 
   emulateCycle: function() {
@@ -128,6 +117,11 @@ Chip8.prototype = {
     // fetch opcode
     const opcode = this.memory[this.programCounter] << 8 | this.memory[this.programCounter + 1];
     console.log('opcode: ' + opcode.toString(16));
+
+    const Vx = (opcode & 0x0F00) >> 8;
+    const Vy = (opcode & 0x00F0) >> 4;
+    const nn = opcode & 0x00FF;
+    const nnn = opcode & 0x0FFF;
 
     // execute opcode
     switch (opcode & 0xF000) {
@@ -141,7 +135,6 @@ Chip8.prototype = {
               this.display[i] = 0;
             }
             this.drawFlag = true;
-            // this.renderer.render(this.display);
             this.programCounter += 2;
             break;
           case 0x000E:
@@ -159,17 +152,17 @@ Chip8.prototype = {
         break;
       case 0x1000:
         // 1NNN - jumps to address NNN
-        this.programCounter = opcode & 0x0FFF;
+        this.programCounter = nnn;
         break;
       case 0x2000:
         // 2NNN - calls subroutine at NNN
         this.stack[this.stackPointer] = this.programCounter;
         this.stackPointer++;
-        this.programCounter = opcode & 0x0FFF;
+        this.programCounter = nnn;
         break;
       case 0x3000:
         // 3XNN - skips the next instruction if Vx === NN
-        if (this.v[(opcode & 0x0F00) >> 8] === (opcode & 0x00FF)) {
+        if (this.v[Vx] === nn) {
           this.programCounter += 4;
         } else {
           this.programCounter += 2;
@@ -177,7 +170,7 @@ Chip8.prototype = {
         break;
       case 0x4000:
         // 4XNN - skips next instrution if Vx does not equal NN
-        if (this.v[(opcode & 0x0F00) >> 8] !== (opcode & 0x0FF)) {
+        if (this.v[Vx] !== nn) {
           this.programCounter += 4;
         } else {
           this.programCounter += 2;
@@ -185,7 +178,7 @@ Chip8.prototype = {
         break;
       case 0x5000:
         // 5XY0 - skips the next opcode if Vx === Vy
-        if (this.v[(opcode & 0x0F00) >> 8] === this.v[(opcode & 0x00F0) >> 4]) {
+        if (this.v[Vx] === this.v[Vy]) {
           this.programCounter += 4;
         } else {
           this.programCounter += 2;
@@ -193,69 +186,88 @@ Chip8.prototype = {
         break;
       case 0x6000:
         // 6XNN - sets Vx to NN
-        this.v[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
+        this.v[Vx] = nn;
         this.programCounter += 2;
         break;
       case 0x7000:
         // 7XNN - Adds NN to Vx
-        this.v[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
+        this.v[Vx] += nn;
+        if (this.v[Vx] > 0xFF) {
+          // checking for overflow
+          this.v[Vx] -= 256;
+        }
         this.programCounter += 2;
         break;
       case 0x8000:
         switch (opcode & 0x000F) {
           case 0x0000:
             // 8XY0 - sets Vx to the value of Vy
-            this.v[(opcode & 0x0F00) >> 8] = this.v[(opcode & 0x00F0) >> 4];
+            this.v[Vx] = this.v[Vy];
+            this.programCounter += 2;
+            break;
+          case 0x0001:
+            // 8XY1 - set Vx = Vx OR Vy
+            this.v[Vx] = this.v[Vx] | this.v[Vy];
             this.programCounter += 2;
             break;
           case 0x0002:
             // 8XY2 - sets Vx to (Vx & Vy)
-            this.v[(opcode & 0x0F00) >> 8] &= this.v[(opcode & 0x00F0) >> 4];
+            this.v[Vx] &= this.v[Vy];
             this.programCounter += 2;
             break;
           case 0x0003:
-            // 8XY3 - sets Vx to (Vx & Vy)
-            this.v[(opcode & 0x0F00) >> 8] &= this.v[(opcode & 0x00F0) >> 4];
+            // 8XY3 - sets Vx to (Vx XOR Vy)
+            this.v[Vx] ^= this.v[Vy];
             this.programCounter += 2;
             break;
           case 0x0004:
             // 8XY4 - adds Vy to Vx. 
             // VF is set to 1 when there's a carry
             // VF set to 0 when there isn't a carry
-            this.v[(opcode & 0x0F00) >> 8] += this.v[(opcode & 0x00F0) >> 4];
-            if (this.v[(opcode & 0x00F0) >> 4] > (0xFF - this.v[(opcode & 0x0F00) >> 8])) {
+            this.v[Vx] += this.v[Vy];
+            if (this.v[Vx] > 0xFF) {
               this.v[0xF] = 1;
+              this.v[Vx] -= 256;
             } else {
               this.v[0xF] = 0;
             }
             this.programCounter += 2;
             break;
-          case 0x0005:
+          case 0x0005: // ? - might be a problem opcode
             // 8XY5 - Vy subtracted from Vx
             // VF set to 0 when there's a borrow
             // VF set to 1 when there isn't
-            if (this.v[(opcode & 0x00F0) >> 4] > this.v[(opcode & 0x0F00) >> 8]) {
-              // there is a borrow
-              this.v[0xF] = 0;
-            } else {
-              // no borrow
+            
+            // if (this.v[(opcode & 0x00F0) >> 4] > this.v[(opcode & 0x0F00) >> 8]) {
+            //   // there is a borrow
+            //   this.v[0xF] = 0;
+            // } else {
+            //   // no borrow
+            //   this.v[0xF] = 1;
+            // }
+            if (this.v[Vx] > this.v[Vy]) {
               this.v[0xF] = 1;
+            } else {
+              this.v[0xF] = 0;
             }
-            this.v[(opcode & 0x0F00) >> 8] -= this.v[(opcode & 0x00F0) >> 4];
+            this.v[Vx] -= this.v[Vy];
             this.programCounter += 2;
             break;
           case 0x0006:
             // 8XY6 - shifts Vx right by one. 
             // VF set to the value of least significant bit of Vx before the shift
-            this.v[0xF] = this.v[(opcode & 0x0F00) >> 8] & 0x1;
-            this.v[(opcode & 0x0F00) >> 8] >>= 1;
+            this.v[0xF] = this.v[Vx] & 0x1;
+            this.v[Vx] >>= 1;
             this.programCounter += 2;
             break;
           case 0x000E:
-            // 8XYE - shifts tv left by one
+            // 8XYE - shifts Vx left by one
             // VF set to least signifcnat bit of Vx before shit
-            this.v[0xF] = this.v[(opcode & 0x0F00) >> 8] >> 7;
-            this.v[(opcode & 0x0F00) >> 8] <<= 1;
+            this.v[0xF] = this.v[Vx] >> 7;
+            this.v[Vx] <<= 1; // multiply by 2 ? this could be overflowing?
+            if (this.v[Vx] > 255) {
+              this.v[Vx] -= 256
+            }
             this.programCounter += 2;
             break;
           default:
@@ -263,6 +275,8 @@ Chip8.prototype = {
             console.log('cycles: ' + this.cycleCount);
             this.running = false;
         }
+        // console.log('unknown 0x8000? : ' + opcode.toString(16));
+        // this.running = false;
         break;
       case 0x9000:
         // 9XY0 - skips the next opcode if Vx !== Vy
@@ -313,7 +327,6 @@ Chip8.prototype = {
           }
         }
         this.drawFlag = true;
-        // this.renderer.render(this.display);
         this.programCounter += 2;
         break;
       case 0xE000:
@@ -425,7 +438,13 @@ Chip8.prototype = {
         console.log('CPU cycle: ' + this.cycleCount);
         this.running = false;
     }
-
+    if (this.v[Vx] > 0xFF || this.v[Vy] > 0xFF) {
+      console.log('OVERFLOW!');
+      console.log('opcode: ' + opcode.toString(16));
+      console.log('Vx: ' + this.v[Vx]);
+      console.log('Vy: ' + this.v[Vy]);
+      this.running = false;
+    }
     // check timers
     if (this.delayTimer > 0) {
       this.delayTimer--;

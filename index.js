@@ -2,6 +2,7 @@ console.log('index');
 import CPU from '/js/cpu.js';
 import Renderer from '/js/renderer.js';
 
+const canvas = document.getElementById('screen');
 
 const pong = '/roms/pong1.ch8';
 const pong2 = '/roms/pong2.ch8';
@@ -9,6 +10,8 @@ const stars = '/roms/stars.ch8';
 const tetris = '/roms/tetris.ch8';
 const maze = '/roms/maze.ch8';
 const blinky = '/roms/blinky.ch8';
+const invaders = '/roms/invaders.ch8';
+const ufo = '/roms/ufo.ch8';
 
 async function loadFile(fileDirStr) {
   let response = await fetch(fileDirStr);
@@ -16,10 +19,8 @@ async function loadFile(fileDirStr) {
   return data;
 }
 
-let canvas = document.getElementById('screen');
-
-loadFile(pong2).then( data => {
-  console.log('pong loaded');
+loadFile(ufo).then( data => {
+  console.log('rom loaded');
   let cpu = new CPU();
   const renderer = new Renderer(canvas, 13);
   cpu.setRenderer(renderer);
