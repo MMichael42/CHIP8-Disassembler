@@ -116,7 +116,7 @@ Chip8.prototype = {
     
     // fetch opcode
     const opcode = this.memory[this.programCounter] << 8 | this.memory[this.programCounter + 1];
-    console.log('opcode: ' + opcode.toString(16));
+    // console.log('opcode: ' + opcode.toString(16));
 
     const Vx = (opcode & 0x0F00) >> 8;
     const Vy = (opcode & 0x00F0) >> 4;
@@ -238,13 +238,6 @@ Chip8.prototype = {
             // VF set to 0 when there's a borrow
             // VF set to 1 when there isn't
             
-            // if (this.v[(opcode & 0x00F0) >> 4] > this.v[(opcode & 0x0F00) >> 8]) {
-            //   // there is a borrow
-            //   this.v[0xF] = 0;
-            // } else {
-            //   // no borrow
-            //   this.v[0xF] = 1;
-            // }
             if (this.v[Vx] > this.v[Vy]) {
               this.v[0xF] = 1;
             } else {
@@ -280,7 +273,7 @@ Chip8.prototype = {
         break;
       case 0x9000:
         // 9XY0 - skips the next opcode if Vx !== Vy
-        if (this.v[(opcode & 0x0F00) >> 8] !== this.v[(opcode & 0x00F0) >> 4]) {
+        if (this.v[Vx] !== this.v[Vy]) {
           this.programCounter += 4;
         } else {
           this.programCounter += 2;
@@ -288,12 +281,12 @@ Chip8.prototype = {
         break;
       case 0xA000:
         // ANNN - sets I to the addess NNN
-        this.I = opcode & 0x0FFF;
+        this.I = nnn;
         this.programCounter += 2;
         break;
       case 0xC000:
         // CXNN - sets Vx to a random numbers, masked by NN
-        this.v[(opcode & 0x0F00) >> 8] = Math.floor(Math.random() * 0xFF) & (opcode & 0x00FF);
+        this.v[Vx] = (Math.floor(Math.random() * 0xFF)) & nn;
         this.programCounter += 2;
         break;
       case 0xD000:
@@ -304,8 +297,8 @@ Chip8.prototype = {
         // I value doesn't change after the calling this instruction
         // VF is set to 1 (collision) if any pixels are flipped from set/unset
         // VF is set to 0 if no pixels are flipped
-        const x = this.v[(opcode & 0x0F00) >> 8];
-        const y = this.v[(opcode & 0x00F0) >> 4];
+        const x = this.v[Vx];
+        const y = this.v[Vy];
         const height = opcode & 0x000F;
         let pixel = null;
 
@@ -334,7 +327,7 @@ Chip8.prototype = {
         switch (opcode & 0x00FF) {
           case 0x009E:
             //EX9E - skips next opcode if the key stored in Vx is active
-            if (this.keys[this.v[(opcode & 0x0F00) >> 8]] !== 0) {
+            if (this.keys[this.v[Vx]] !== 0) {
               this.programCounter += 4;
             } else {
               this.programCounter += 2;
@@ -342,7 +335,7 @@ Chip8.prototype = {
             break;
           case 0x00A1:
             // EXA1 - skips next opcode if the key stores in Vx isn't active
-            if (this.keys[this.v[(opcode & 0x0F00) >> 8]] === 0) {
+            if (this.keys[this.v[Vx]] === 0) {
               this.programCounter += 4;
             } else {
               this.programCounter += 2;
@@ -357,8 +350,8 @@ Chip8.prototype = {
         // FX__
         switch(opcode & 0x0FF) {
           case 0x0007:
-            // FX07 - ses Vc to the value of the delay timer
-            this.v[(opcode & 0x0F00) >> 8] = this.delayTimer;
+            // FX07 - ses Vx to the value of the delay timer
+            this.v[Vx] = this.delayTimer;
             this.programCounter += 2;
             break;
           case 0x000A:
@@ -366,61 +359,65 @@ Chip8.prototype = {
             let keyPressed = false;
             for (let i = 0; i < 16; i++) {
               if (this.keys[i] !== 0) {
-                this.v[(opcode & 0x0F00) >> 8] = i;
+                this.v[Vx] = i;
                 keyPressed = true;
               }
             }
             if (!keyPressed) {
+              // should we increment program counter here?
               return;
             }
             this.programCounter += 2;
             break;
           case 0x0015:
             // FX15 - sets the delay timer to Vx
-            this.delayTimer = this.v[(opcode & 0x0F00) >> 8];
+            this.delayTimer = this.v[Vx];
             this.programCounter += 2;
             break;
           case 0x0018:
             // FX18 - sets the sound timer to Vx
-            this.soundTimer = this.v[(opcode & 0x0F00) >> 8];
+            this.soundTimer = this.v[Vx];
             this.programCounter += 2;
             break;
           case 0x001E:
             // FX1E - adds Vx to I
             // VF is set to 1 when range overflow: I + Vx > 0xFFF
-            if (this.I + this.v[(opcode & 0x0F00) >> 8] > 0xFFF) {
+            // ? 0xFFF? should it be 0xFF?
+            if (this.I + this.v[Vx] > 0xFFF) {
               this.v[0xF] = 1;
             } else {
               this.v[0xF] = 0;
             }
-            this.I += this.v[(opcode & 0x0F00) >> 8];
+            this.I += this.v[Vx];
             this.programCounter += 2;
             break;
           case 0x029:
-            // FX29 - sets I to te location of the sprite for the character in Vx
-            this.I = this.v[(opcode & 0x0F00) >> 8] * 0x5; // ?
+            // FX29 - sets I to the location of the sprite for the character in Vx
+            this.I = this.v[Vx] * 0x5; // ? why .5, and should we be rounding it?
             this.programCounter += 2;
             break;
           case 0x0033:
             // FX33 - stores the binary coded decimal representation of Vx
             // at the addresses I, I plus 1, and I plus 2
-            this.memory[this.I]     = this.v[(opcode & 0x0F00) >> 8] / 100;
-            this.memory[this.I + 1] = (this.v[(opcode & 0x0F00) >> 8] / 10 ) % 10;
-            this.memory[this.I + 2] = this.v[(opcode & 0x0F00) >> 8] % 10; 
+            // should these be rounded down?
+            this.memory[this.I]     = this.v[Vx] / 100;
+            this.memory[this.I + 1] = (this.v[Vx] / 10 ) % 10;
+            this.memory[this.I + 2] = this.v[Vx] % 10; 
             this.programCounter += 2;
             break;
           case 0x0055:
             // FX55 - stores V0 to Vx in memory starting at address I
-            for (let i = 0; i <= ((opcode & 0x0F00) >> 8); i++) {
+            for (let i = 0; i <= Vx; i++) {
               this.memory[this.I + i] = this.v[i];
             }
             // in original interpreter, when this operation is done
             // I = I + Vx + 1;
-            this.I += ((opcode & 0x0F00) >> 8) + 1;
+            this.I += Vx + 1;
             this.programCounter += 2;
             break;
           case 0x0065:
-            for (let i = 0; i <= ((opcode & 0x0F00) >> 8); i++) {
+            // FX65 - Read registers V0 through Vx from memory starting at location I.
+            for (let i = 0; i <= Vx; i++) {
               this.v[i] = this.memory[this.I + i];
             }
             // in original interpreter, when this operation is done
@@ -438,11 +435,19 @@ Chip8.prototype = {
         console.log('CPU cycle: ' + this.cycleCount);
         this.running = false;
     }
-    if (this.v[Vx] > 0xFF || this.v[Vy] > 0xFF) {
+    //  check for overflow
+    if (this.v[Vx] > 0xFF 
+      || this.v[Vy] > 0xFF 
+      || this.I > 0xFFFF 
+      || this.soundTimer > 0xFF 
+      || this.delayTimer > 0xFF) {
       console.log('OVERFLOW!');
       console.log('opcode: ' + opcode.toString(16));
       console.log('Vx: ' + this.v[Vx]);
       console.log('Vy: ' + this.v[Vy]);
+      console.log('I: ' + this.I.toString(16));
+      console.log('soundTimer: ' +  this.soundTimer);
+      console.log('delayTimer: ' + this.delayTimer);
       this.running = false;
     }
     // check timers

@@ -19,7 +19,7 @@ Renderer.prototype = {
 
 
   render: function(display) {
-    console.log('render draw call');
+    // console.log('render draw call');
     this.clear();
     for (let pixel = 0; pixel < display.length; pixel++) {
       const x = (pixel % this.width) * this.pixelSize;
