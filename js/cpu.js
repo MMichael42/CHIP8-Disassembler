@@ -15,6 +15,7 @@ let Chip8 = function() {
   this.displayHeight = 32;
   this.display = new Array(this.displayWidth * this.displayHeight);
   this.renderer = null;
+  this.frameRequestID = null;
 
   // timers
   this.soundTimer = 0;
@@ -41,6 +42,10 @@ Chip8.prototype = {
     this.stackPointer = 0;
     this.running = true;
 
+    // cancel animation frame request if there is one currently running
+    if (this.frameRequestID) {
+      cancelAnimationFrame(this.frameRequestID);
+    }
     // clear memory
     for (let i = 0; i < this.memory.length; i++) {
       this.memory[i] = 0x0;
@@ -70,7 +75,7 @@ Chip8.prototype = {
     for (let i = 0; i < hexChars.length; i++) {
       this.memory[i] = hexChars[i];
     }
-    console.log(this.memory);
+    // console.log(this.memory);
   
     // clear the display
     for (let i = 0; i < this.display.length; i++) {
@@ -101,14 +106,19 @@ Chip8.prototype = {
         self.drawFlag = false;
       }
 
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 10; i++) {
         if (self.running) {
           self.emulateCycle();
         }
       }
   
-      requestAnimationFrame(me);
+      self.frameRequestID = requestAnimationFrame(me);
     });
+  },
+
+  kill: function() {
+    this.running = false;
+    cancelAnimationFrame = this.frameRequestID;
   },
 
   emulateCycle: function() {
@@ -199,6 +209,8 @@ Chip8.prototype = {
         this.programCounter += 2;
         break;
       case 0x8000:
+        // console.log('0x8000');
+        // console.log(opcode.toString(16));
         switch (opcode & 0x000F) {
           case 0x0000:
             // 8XY0 - sets Vx to the value of Vy
@@ -233,17 +245,24 @@ Chip8.prototype = {
             }
             this.programCounter += 2;
             break;
-          case 0x0005: // ? - might be a problem opcode
+          case 0x0005:
             // 8XY5 - Vy subtracted from Vx
             // VF set to 0 when there's a borrow
             // VF set to 1 when there isn't
-            
-            if (this.v[Vx] > this.v[Vy]) {
-              this.v[0xF] = 1;
-            } else {
+
+            if (this.v[Vy] > this.v[Vx]) {
+              // there is a borrow
               this.v[0xF] = 0;
+            } else {
+              this.v[0xF] = 1;
             }
+
             this.v[Vx] -= this.v[Vy];
+
+            // check for underflow and correct if true
+            if (this.v[Vx] < 0x00) {
+              this.v[Vx] = 0xFF - (Math.abs(this.v[Vx] + 1));
+            }
             this.programCounter += 2;
             break;
           case 0x0006:
@@ -342,7 +361,7 @@ Chip8.prototype = {
             }
             break;
           default:
-            console.log('unhanled EX__ opcode: ' + opcode.toString(16));
+            console.log('unhandled EX__ opcode: ' + opcode.toString(16));
             this.running = false;
         }
         break;
@@ -443,6 +462,22 @@ Chip8.prototype = {
       || this.soundTimer > 0xFF 
       || this.delayTimer > 0xFF) {
       console.log('OVERFLOW!');
+      console.log('opcode: ' + opcode.toString(16));
+      console.log('Vx: ' + this.v[Vx]);
+      console.log('Vy: ' + this.v[Vy]);
+      console.log('I: ' + this.I.toString(16));
+      console.log('soundTimer: ' +  this.soundTimer);
+      console.log('delayTimer: ' + this.delayTimer);
+      this.running = false;
+    }
+
+    //  check for underflow
+    if (this.v[Vx] < 0x00 
+      || this.v[Vy] < 0x00 
+      || this.I < 0x00 
+      || this.soundTimer < 0x00 
+      || this.delayTimer < 0x00) {
+      console.log('UNDERFLOW!');
       console.log('opcode: ' + opcode.toString(16));
       console.log('Vx: ' + this.v[Vx]);
       console.log('Vy: ' + this.v[Vy]);
