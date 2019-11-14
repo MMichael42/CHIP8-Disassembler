@@ -11,13 +11,28 @@
 </head>
 
 <body>
+
+  <div id="headerContainer">
+    <h1>CHIP8 Emulator</h1>
+  </div>
+
   <div id="screenContainer">
       <canvas id="screen" width=64 height=32></canvas>
   </div>
 
-  <div class="buttonBox">
-    <button id="reset">load</button>
+  <div id="optionsWrap">
+    
+    <select id="selectGame">
+      <option selected disabled>pick a game</option>
+      <option value="0">test.ch8</option>
+    </select>
+  
+    <div class="buttonBox">
+      <button id="reset">load</button>
+    </div>
+
   </div>
+
 
   <script type="module" src="index.js?v=20191113"></script>
 </body>

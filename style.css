@@ -1,10 +1,15 @@
 * {
   box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
 }
 body {
   margin: 0;
   padding: 10px;
   background-color: white;
+}
+
+#headerContainer {
+  text-align: center;
 }
 
 #screenContainer {
@@ -18,10 +23,29 @@ body {
   box-shadow: rgb(194, 194, 194) 10px 10px 10px;
   margin: 0 auto;
   display: block;
+  width: 640px;
+  height: 320px;
+  background-color: black;
+}
+
+#optionsWrap {
+  width: 100%;
+  margin-top: 20px;
+  border: 0px solid black;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#selectGame {
+  width: 200px;
+  margin: auto;
+  margin-top: 10px;
 }
 
 .buttonBox {
   border: 0px solid black;
+  margin: auto;
   margin-top: 20px;
 }
 
@@ -29,7 +53,8 @@ button#reset {
   border: 1px solid black;
   border-radius: 5px;
   width: 200px;
-  height: 100px;
+  height: 50px;
   background-color: white;
   cursor: pointer;
 }
+

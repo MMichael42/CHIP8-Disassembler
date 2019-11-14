@@ -18,6 +18,19 @@ const ibm = '/roms/IBM.ch8';
 const tron = '/roms/TRON.ch8';
 const landing = '/roms/LANDING.ch8';
 
+const gameArray = [
+  'test.ch8', 
+  'pong1.ch8', 
+  'pong2.ch8', 
+  'stars.ch8', 
+  'maze.ch8', 
+  'blinky.ch8', 
+  'invaders.ch8', 
+  'ufo.ch8',
+  'TRON.ch8',
+  'LANDING.ch8'
+];
+
 async function loadFile(fileDirStr) {
   let response = await fetch(fileDirStr);
   let data = await response.arrayBuffer();
@@ -25,11 +38,14 @@ async function loadFile(fileDirStr) {
 }
 
 buttonLoad.addEventListener('click', event => {
-  console.log(event);
+  // console.log(event);
 
+  const selectEleValue = document.getElementById('selectGame').selectedIndex - 1;
+  console.log(selectEleValue);
   // canvas.style.width = "400px";
+  const selectedGame = '/roms/' + gameArray[selectEleValue];
 
-  loadFile(maze).then( data => {
+  loadFile(selectedGame).then( data => {
     console.log('rom loaded');
     let cpu = new CPU();
     const renderer = new Renderer(canvas, 10);
