@@ -101,7 +101,7 @@ Chip8.prototype = {
         self.drawFlag = false;
       }
 
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 20; i++) {
         if (self.running) {
           self.emulateCycle();
         }
@@ -435,6 +435,7 @@ Chip8.prototype = {
         console.log('CPU cycle: ' + this.cycleCount);
         this.running = false;
     }
+
     //  check for overflow
     if (this.v[Vx] > 0xFF 
       || this.v[Vy] > 0xFF 
@@ -450,6 +451,7 @@ Chip8.prototype = {
       console.log('delayTimer: ' + this.delayTimer);
       this.running = false;
     }
+
     // check timers
     if (this.delayTimer > 0) {
       this.delayTimer--;

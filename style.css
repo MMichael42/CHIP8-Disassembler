@@ -7,17 +7,6 @@ body {
   background-color: white;
 }
 
-button#reset {
-  margin-top: 100px;
-  margin-left: 30px;
-  border: 1px solid black;
-  border-radius: 5px;
-  width: 200px;
-  height: 100px;
-  background-color: white;
-  cursor: pointer;
-}
-
 #screenContainer {
   border: 0px solid black;
   width: 100%;
@@ -29,4 +18,18 @@ button#reset {
   box-shadow: rgb(194, 194, 194) 10px 10px 10px;
   margin: 0 auto;
   display: block;
+}
+
+.buttonBox {
+  border: 0px solid black;
+  margin-top: 20px;
+}
+
+button#reset {
+  border: 1px solid black;
+  border-radius: 5px;
+  width: 200px;
+  height: 100px;
+  background-color: white;
+  cursor: pointer;
 }

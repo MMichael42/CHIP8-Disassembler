@@ -3,6 +3,7 @@ import CPU from '/js/cpu.js';
 import Renderer from '/js/renderer.js';
 
 const canvas = document.getElementById('screen');
+const buttonLoad = document.getElementById('reset');
 
 const test = '/roms/test.ch8';
 const pong = '/roms/pong1.ch8';
@@ -23,13 +24,23 @@ async function loadFile(fileDirStr) {
   return data;
 }
 
-loadFile(test).then( data => {
-  console.log('rom loaded');
-  let cpu = new CPU();
-  const renderer = new Renderer(canvas, 13);
-  cpu.setRenderer(renderer);
-  cpu.init();
-  cpu.loadROM(new Uint8Array(data));
-  cpu.run();
+buttonLoad.addEventListener('click', event => {
+  console.log(event);
+
+  // canvas.style.width = "400px";
+
+  loadFile(maze).then( data => {
+    console.log('rom loaded');
+    let cpu = new CPU();
+    const renderer = new Renderer(canvas, 10);
+    
+    cpu.setRenderer(renderer);
+    cpu.init();
+    cpu.loadROM(new Uint8Array(data));
+    cpu.run();
+  });
+
 });
+
+
 
