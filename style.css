@@ -16,6 +16,16 @@ canvas {
   image-rendering: crisp-edges;
 }
 
+button {
+  font-size: 14px;
+  border: 1px solid #333;
+  border-radius: 5px;
+  width: 200px;
+  height: 50px;
+  background-color: white;
+  cursor: pointer;
+}
+
 #headerContainer {
   text-align: center;
 }
@@ -31,8 +41,6 @@ canvas {
   box-shadow: rgb(194, 194, 194) 10px 10px 10px;
   margin: 0 auto;
   display: block;
-  /* width: 640px;
-  height: 320px; */
   width: 100%;
   max-width: 800px;
   height: auto;
@@ -58,14 +66,5 @@ canvas {
   border: 0px solid black;
   margin: auto;
   margin-top: 20px;
-}
-
-button#reset {
-  border: 1px solid black;
-  border-radius: 5px;
-  width: 200px;
-  height: 50px;
-  background-color: white;
-  cursor: pointer;
 }
 

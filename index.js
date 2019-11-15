@@ -5,12 +5,10 @@ import Renderer from './js/renderer.js';
 
 
 let canvas = document.getElementById('screen');
-
 const buttonLoad = document.getElementById('reset');
 
 const cpu = new CPU();
 const renderer = new Renderer(canvas, 1);
-
 cpu.setRenderer(renderer);
 
 const gameArray = [
@@ -37,16 +35,14 @@ gameArray.forEach( (game, index) => {
   selectEle.appendChild(option);
 });
 
-async function loadFile(fileDirStr) {
-  let response = await fetch(fileDirStr);
-  let data = await response.arrayBuffer();
-  return data;
-}
+// enable button once the select element has been enaged
+selectEle.addEventListener('change', event => {
+  buttonLoad.disabled = false;
+});
 
 buttonLoad.addEventListener('click', event => {
   // console.log(event);
-  const selectEleValue = document.getElementById('selectGame').selectedIndex - 1;
-
+  const selectEleValue = selectEle.selectedIndex - 1;
   const selectedGame = './roms/' + gameArray[selectEleValue];
 
   loadFile(selectedGame).then( data => {
@@ -55,8 +51,10 @@ buttonLoad.addEventListener('click', event => {
     cpu.loadROM(new Uint8Array(data));
     cpu.run();
   });
-
 });
 
-
-
+async function loadFile(fileDirStr) {
+  let response = await fetch(fileDirStr);
+  let data = await response.arrayBuffer();
+  return data;
+}
