@@ -4,11 +4,12 @@ import Renderer from './js/renderer.js';
 
 
 
-const canvas = document.getElementById('screen');
+let canvas = document.getElementById('screen');
+
 const buttonLoad = document.getElementById('reset');
 
 const cpu = new CPU();
-const renderer = new Renderer(canvas, 10);
+const renderer = new Renderer(canvas, 1);
 
 cpu.setRenderer(renderer);
 

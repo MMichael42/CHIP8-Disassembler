@@ -1,5 +1,6 @@
 const Renderer = function(canvas, pixelSize) {
   this.context = canvas.getContext('2d');
+  this.context.imageSmoothingEnabled = false;
   this.canvas = canvas;
   this.width = 64;
   this.height = 32;

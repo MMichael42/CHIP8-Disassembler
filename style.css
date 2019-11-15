@@ -2,10 +2,18 @@
   box-sizing: border-box;
   font-family: Arial, Helvetica, sans-serif;
 }
+
 body {
   margin: 0;
   padding: 10px;
   background-color: white;
+}
+
+canvas {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 #headerContainer {
@@ -23,10 +31,11 @@ body {
   box-shadow: rgb(194, 194, 194) 10px 10px 10px;
   margin: 0 auto;
   display: block;
-  width: 640px;
-  height: 320px;
-  max-width: 100%;
-  max-height: auto;
+  /* width: 640px;
+  height: 320px; */
+  width: 100%;
+  max-width: 800px;
+  height: auto;
   background-color: black;
 }
 
