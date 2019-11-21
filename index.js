@@ -2,11 +2,12 @@ console.log('index');
 import CPU from './js/cpu.js';
 import Renderer from './js/renderer.js';
 
-
-
-let canvas = document.getElementById('screen');
+const canvas = document.getElementById('screen');
 const buttonLoad = document.getElementById('reset');
+const keyboardWrap = document.getElementById('keyboardWrap');
+console.log(keyboardWrap.children);
 
+// create the cpu and renderer 
 const cpu = new CPU();
 const renderer = new Renderer(canvas, 1);
 cpu.setRenderer(renderer);
@@ -28,20 +29,19 @@ const gameArray = [
 // grab the select element
 let selectEle = document.getElementById('selectGame');
 // populate it
-gameArray.forEach( (game, index) => {
+gameArray.forEach( (game) => {
   let option = document.createElement('option');
   option.textContent = game;
   option.value = game;
   selectEle.appendChild(option);
 });
 
-// enable button once the select element has been enaged
+// enable button once the select element has been engaged
 selectEle.addEventListener('change', event => {
   buttonLoad.disabled = false;
 });
 
 buttonLoad.addEventListener('click', event => {
-  // console.log(event);
   const selectEleValue = selectEle.selectedIndex - 1;
   const selectedGame = './roms/' + gameArray[selectEleValue];
 
@@ -53,8 +53,8 @@ buttonLoad.addEventListener('click', event => {
   });
 });
 
-async function loadFile(fileDirStr) {
-  let response = await fetch(fileDirStr);
+async function loadFile(filePath) {
+  let response = await fetch(filePath);
   let data = await response.arrayBuffer();
   return data;
 }

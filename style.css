@@ -19,7 +19,7 @@ canvas {
 button {
   font-size: 14px;
   border: 1px solid #333;
-  border-radius: 5px;
+  border-radius: 2px;
   width: 200px;
   height: 50px;
   background-color: white;
@@ -37,8 +37,7 @@ button {
 }
 
 #screen {
-  border: 5px solid black;
-  box-shadow: rgb(194, 194, 194) 10px 10px 10px;
+  border: 10px solid black;
   margin: 0 auto;
   display: block;
   width: 100%;
@@ -68,3 +67,25 @@ button {
   margin-top: 20px;
 }
 
+#keyboardWrap {
+  border: 0px solid black;
+  width: 100%;
+  max-width: 425px;
+  margin: auto;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.key {
+  border: 1px solid black;
+  border-radius: 2px;
+  margin: 1px;
+  width: 24%;
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
+  cursor: pointer;
+}
