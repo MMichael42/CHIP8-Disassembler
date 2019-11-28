@@ -1,10 +1,10 @@
 * {
   box-sizing: border-box;
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
 }
 
 body {
-  margin: 0;
   padding: 10px;
   background-color: white;
 }
@@ -28,6 +28,9 @@ button {
 
 #headerContainer {
   text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
 }
 
 #screenContainer {
@@ -82,8 +85,8 @@ button {
 .key {
   border: 1px solid black;
   border-radius: 2px;
-  margin: 1px;
-  width: 24%;
+  margin: 3px;
+  width: 23%;
   height: 50px;
   line-height: 50px;
   text-align: center;

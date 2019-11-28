@@ -25,8 +25,8 @@ let Chip8 = function() {
   this.running = false;
   this.drawFlag = false;
 
-  // input
-  this.keys = new Array(16);
+  // input, prefill with 0
+  this.keys = Array(16).fill(0);
 }
 
 Chip8.prototype = {
@@ -88,6 +88,8 @@ Chip8.prototype = {
       this.v[i] = 0x0;
       this.keys[i] = 0x0;
     }
+    // this.keys[5] = 1; 
+    // console.log(this.keys);
   },
 
   loadROM: function(rom) {
@@ -108,6 +110,7 @@ Chip8.prototype = {
 
       for (let i = 0; i < 10; i++) {
         if (self.running) {
+          // step the cpu
           self.emulateCycle();
         }
       }
@@ -345,18 +348,21 @@ Chip8.prototype = {
         // EX__
         switch (opcode & 0x00FF) {
           case 0x009E:
-            //EX9E - skips next opcode if the key stored in Vx is active
+            //EX9E - skips next opcode if the key stored at index Vx is active
+            console.log('EX9E - control opcode');
             if (this.keys[this.v[Vx]] !== 0) {
+              console.log('key pressed!');
               this.programCounter += 4;
             } else {
               this.programCounter += 2;
             }
             break;
           case 0x00A1:
-            // EXA1 - skips next opcode if the key stores in Vx isn't active
+            // EXA1 - skips next opcode if the key stored at index Vx isn't active
             if (this.keys[this.v[Vx]] === 0) {
               this.programCounter += 4;
             } else {
+              console.log('key pressed!');
               this.programCounter += 2;
             }
             break;
@@ -493,7 +499,7 @@ Chip8.prototype = {
     }
     if (this.soundTimer > 0) {
       if (this.soundTimer === 1) {
-        console.log('beep!');
+        // console.log('beep!');
       }
       this.soundTimer--;
     }

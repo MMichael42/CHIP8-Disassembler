@@ -5,7 +5,6 @@ import Renderer from './js/renderer.js';
 const canvas = document.getElementById('screen');
 const buttonLoad = document.getElementById('reset');
 const keyboardWrap = document.getElementById('keyboardWrap');
-console.log(keyboardWrap.children);
 
 // create the cpu and renderer 
 const cpu = new CPU();
@@ -50,6 +49,42 @@ buttonLoad.addEventListener('click', event => {
     cpu.init();
     cpu.loadROM(new Uint8Array(data));
     cpu.run();
+  });
+});
+
+keyboardWrap.addEventListener('mousedown', function(event) {
+  if (event.target.className === 'key') {
+    console.log('mousedown');
+    const keyPressed = parseInt(event.target.textContent);
+
+    switch(keyPressed) {
+      case 5:
+        console.log('key 5');
+        cpu.keys[5] = 1;
+        break;
+      default:
+        console.log('key not handled');
+    }
+  }
+
+
+  // cpu.keys.forEach( (key, index) => {
+  //   // first check the clicked div is a key
+  //   if (event.target.className === 'key') {
+  //     // then check to see if that key's bit is flipped in the key arr
+  //     if (event.target.id == index) {
+  //       cpu.keys[index] = 1;
+  //     } else {
+  //       cpu.keys[index] = 0;
+  //     }
+  //   }
+  // });
+  // console.log(cpu.keys);
+});
+keyboardWrap.addEventListener('mouseup', function(event) {
+  console.log('mouseup');
+  cpu.keys.forEach( (key, index) => {
+    cpu.keys[index] = 0;
   });
 });
 
