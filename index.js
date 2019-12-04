@@ -55,32 +55,34 @@ buttonLoad.addEventListener('click', event => {
 keyboardWrap.addEventListener('mousedown', function(event) {
   if (event.target.className === 'key') {
     console.log('mousedown');
-    const keyPressed = parseInt(event.target.textContent);
+    const keyPressed = parseInt(event.target.id);
 
     switch(keyPressed) {
+      case 0:
+      case 1:
+      case 2:
+      case 3:
+      case 4:
       case 5:
-        console.log('key 5');
-        cpu.keys[5] = 1;
+      case 6:
+      case 7:
+      case 8:
+      case 9:
+      case 10:
+      case 11:
+      case 12:
+      case 13:
+      case 14:
+      case 15:
+        console.log('key pressed, id = ' + keyPressed);
+        cpu.keys[keyPressed] = 1;
         break;
       default:
         console.log('key not handled');
     }
   }
-
-
-  // cpu.keys.forEach( (key, index) => {
-  //   // first check the clicked div is a key
-  //   if (event.target.className === 'key') {
-  //     // then check to see if that key's bit is flipped in the key arr
-  //     if (event.target.id == index) {
-  //       cpu.keys[index] = 1;
-  //     } else {
-  //       cpu.keys[index] = 0;
-  //     }
-  //   }
-  // });
-  // console.log(cpu.keys);
 });
+
 keyboardWrap.addEventListener('mouseup', function(event) {
   console.log('mouseup');
   cpu.keys.forEach( (key, index) => {
