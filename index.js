@@ -52,44 +52,6 @@ buttonLoad.addEventListener('click', event => {
   });
 });
 
-// mobile touch interface
-// keyboardWrap.addEventListener('touchstart', function(event) {
-//   console.log(event);
-//   console.log(event.path[0]);
-// });
-
-// desktop mouse interface
-// keyboardWrap.addEventListener('mousedown', function(event) {
-//   // console.log('touch event: ' + event.path[0].className);
-//   if (event.path[0].className === 'key') {
-//     console.log('mousedown');
-//     const keyPressed = parseInt(event.path[0].id);
-
-//     switch(keyPressed) {
-//       case 0:
-//       case 1:
-//       case 2:
-//       case 3:
-//       case 4:
-//       case 5:
-//       case 6:
-//       case 7:
-//       case 8:
-//       case 9:
-//       case 10:
-//       case 11:
-//       case 12:
-//       case 13:
-//       case 14:
-//       case 15:
-//         console.log('key pressed, id = ' + keyPressed);
-//         cpu.keys[keyPressed] = 1;
-//         break;
-//       default:
-//         console.log('key not handled');
-//     }
-//   }
-// });
 
 keyboardWrap.addEventListener('mousedown', handleInput);
 keyboardWrap.addEventListener('touchstart', handleInput);
@@ -109,8 +71,6 @@ async function loadFile(filePath) {
 
 function handleInput(event) {
   console.log('hello from handle input');
-  // console.log(event)
-  // alert(event.target.className);
   if (event.target.className === 'key') {
     const keyPressed = parseInt(event.target.id);
 
@@ -133,7 +93,6 @@ function handleInput(event) {
       case 15:
         console.log('key pressed, id = ' + keyPressed);
         cpu.keys[keyPressed] = 1;
-        // alert(cpu.keys);
         break;
       default:
         console.log('key not handled');
